@@ -3,6 +3,15 @@
 version = 3
 
 [[package]]
+name = "cleasby_cli"
+version = "0.1.0"
+dependencies = [
+ "multimap",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -21,15 +30,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "defc4c55412d89136f966bbb339008b474350e5e6e78d2714439c386b3137a03"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "old_norse"
-version = "0.1.0"
-dependencies = [
- "multimap",
- "serde",
- "serde_json",
 ]
 
 [[package]]
