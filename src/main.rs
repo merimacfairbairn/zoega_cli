@@ -56,11 +56,16 @@ fn suggest_words(word: &str, data: &MultiMap<String, Vec<String>>) -> Vec<String
     let regex_pattern = format!(r"(?i)^{}.*", regex::escape(&word));
     let regex = Regex::new(&regex_pattern).expect("Invalid regex pattern");
 
-    data.keys()
+    let mut matches: Vec<(String, usize)> = data.keys()
         .filter(|key| regex.is_match(key))
-        .take(5)
-        .cloned()
-        .collect()
+        .map(|key| {
+            let extra_chars = key.len().saturating_sub(word.len());
+            (key.clone(), extra_chars)
+        })
+        .collect();
+
+    matches.sort_by_key(|&(_, extra_chars)| extra_chars);
+    matches.into_iter().take(5).map(|(key, _)| key).collect()
 }
 
 fn is_lowercase(string: &str) -> bool {
