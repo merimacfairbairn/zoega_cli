@@ -2,6 +2,7 @@ use multimap::MultiMap;
 use serde::{Deserialize, Serialize};
 use std::fs::{self};
 use std::process::exit;
+use regex::Regex;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Pair {
@@ -20,20 +21,48 @@ fn main() {
     let contents = fs::read_to_string(&dict_path).expect("Could not load dictionary");
     let json: Vec<Pair> = serde_json::from_str(&contents).expect("Malformed JSON");
 
-    let mut word_map = MultiMap::new();
+    // TODO: Is there a way to avoid cloning?
+    let mut pairs_map = MultiMap::new();
     for pair in &json {
-        word_map.insert(&pair.word, &pair.definitions);
+        pairs_map.insert(pair.word.clone(), pair.definitions.clone());
     }
 
-    match word_map.get(&word) {
+    match pairs_map.get(&word) {
         Some(definitons) => {
             definitons.into_iter().for_each(|definition| {
                 println!("{}\n", definition);
             });
         }
         None => {
-            println!("The given word does not exist");
-            exit(1);
+            let suggestions = suggest_words(&word, &pairs_map);
+            if suggestions.is_empty() || word.len() <= 2 {
+                println!("No matches found");
+            } else {
+                println!("Did you mean one of these?");
+                for suggestion in suggestions {
+                    println!(" - {}", suggestion);
+                }
+            }
         }
     };
+
+    let word_upper = &word.to_uppercase();
+    if pairs_map.get(word_upper).is_some() && is_lowercase(&word){
+        println!("\nSee capitalized version: {}", word_upper);
+    }
+}
+
+fn suggest_words(word: &str, data: &MultiMap<String, Vec<String>>) -> Vec<String> {
+    let regex_pattern = format!(r"(?i)^{}.*", regex::escape(&word));
+    let regex = Regex::new(&regex_pattern).expect("Invalid regex pattern");
+
+    data.keys()
+        .filter(|key| regex.is_match(key))
+        .take(5)
+        .cloned()
+        .collect()
+}
+
+fn is_lowercase(string: &str) -> bool {
+    string.chars().all(|c| c.is_lowercase())
 }
