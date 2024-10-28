@@ -1,8 +1,8 @@
 use multimap::MultiMap;
-use serde::{Deserialize, Serialize};
-use std::fs::{self};
-use std::process::exit;
 use regex::Regex;
+use serde::{Deserialize, Serialize};
+use std::process::exit;
+use std::{env, fs};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Pair {
@@ -11,22 +11,12 @@ struct Pair {
 }
 
 fn main() {
-    let word = std::env::args().nth(1).unwrap_or_else(|| {
+    let word = env::args().nth(1).unwrap_or_else(|| {
         println!("Please provide a word");
         exit(1);
     });
 
-    let dict_path = "data/dictionary.json";
-
-    let contents = fs::read_to_string(&dict_path).expect("Could not load dictionary");
-    let json: Vec<Pair> = serde_json::from_str(&contents).expect("Malformed JSON");
-
-    // TODO: Is there a way to avoid cloning?
-    let mut pairs_map = MultiMap::new();
-    for pair in &json {
-        pairs_map.insert(pair.word.clone(), pair.definitions.clone());
-    }
-
+    let pairs_map = get_pairs_map("data/dictionary.json");
     match pairs_map.get(&word) {
         Some(definitons) => {
             definitons.into_iter().for_each(|definition| {
@@ -46,17 +36,15 @@ fn main() {
         }
     };
 
-    let word_upper = &word.to_uppercase();
-    if pairs_map.get(word_upper).is_some() && is_lowercase(&word){
-        println!("\nSee capitalized version: {}", word_upper);
-    }
+    suggest_upper_if_exists(&word, &pairs_map);
 }
 
 fn suggest_words(word: &str, data: &MultiMap<String, Vec<String>>) -> Vec<String> {
     let regex_pattern = format!(r"(?i)^{}.*", regex::escape(&word));
     let regex = Regex::new(&regex_pattern).expect("Invalid regex pattern");
 
-    let mut matches: Vec<(String, usize)> = data.keys()
+    let mut matches: Vec<(String, usize)> = data
+        .keys()
         .filter(|key| regex.is_match(key))
         .map(|key| {
             let extra_chars = key.len().saturating_sub(word.len());
@@ -68,6 +56,22 @@ fn suggest_words(word: &str, data: &MultiMap<String, Vec<String>>) -> Vec<String
     matches.into_iter().take(5).map(|(key, _)| key).collect()
 }
 
-fn is_lowercase(string: &str) -> bool {
-    string.chars().all(|c| c.is_lowercase())
+fn suggest_upper_if_exists(word: &str, pairs_map: &MultiMap<String, Vec<String>>) {
+    let word_upper = &word.to_uppercase();
+    if pairs_map.get(word_upper).is_some() && word.chars().all(|c| c.is_lowercase()) {
+        println!("See capitalized version: {}", word_upper);
+    }
+}
+
+fn get_pairs_map(path: &str) -> MultiMap<String, Vec<String>> {
+    let contents = fs::read_to_string(path).expect("Could not load dictionary");
+    let json: Vec<Pair> = serde_json::from_str(&contents).expect("Malformed JSON");
+
+    // TODO: Is there a way to avoid cloning?
+    let mut pairs_map = MultiMap::new();
+    for pair in &json {
+        pairs_map.insert(pair.word.clone(), pair.definitions.clone());
+    }
+
+    pairs_map
 }
