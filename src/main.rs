@@ -15,7 +15,7 @@ struct Pair {
 #[command(name = "Cleasby-Vigfusson dictionary searcher")]
 #[command(about="A CLI to search through Cleasby-Vigfusson dictionary of Old Norse Language", long_about=None)]
 #[command(author = "merimacfairbair")]
-#[command(version = "v1.0.0")]
+#[command(version = "v1.1.1")]
 #[command(group(
         ArgGroup::new("search")
         .required(true)
@@ -29,6 +29,10 @@ struct Cli {
     /// Custom regex pattern for search
     #[arg(short = 's', long, group = "search")]
     pattern: Option<String>,
+
+    /// Number of suggestions to display(default is 5)
+    #[arg(short = 'n', long, default_value_t = 5)]
+    limit: usize,
 }
 
 fn main() {
@@ -43,11 +47,12 @@ fn main() {
             definitions
                 .iter()
                 .for_each(|definition| println!("{}\n", definition));
-            exit(1);
         }
+        suggest_upper_if_exists(word, &pairs_map);
+        exit(1);
     }
 
-    let suggestions = suggest_words(word, &pairs_map, args.pattern.as_deref());
+    let suggestions = suggest_words(word, &pairs_map, args.pattern.as_deref(), args.limit);
 
     if suggestions.is_empty() || word.unwrap_or("---").len() <= 2 {
         println!("No matches found");
@@ -57,14 +62,13 @@ fn main() {
             println!(" - {}", suggestion);
         }
     }
-
-    //suggest_upper_if_exists(&word, &pairs_map);
 }
 
 fn suggest_words(
     word: Option<&str>,
     data: &MultiMap<String, Vec<String>>,
     pattern: Option<&str>,
+    limit: usize,
 ) -> Vec<String> {
     let regex_pattern = match pattern {
         Some(pat) => pat.to_string(),
@@ -86,15 +90,15 @@ fn suggest_words(
         .collect();
 
     matches.sort_by_key(|&(_, extra_chars)| extra_chars);
-    matches.into_iter().take(5).map(|(key, _)| key).collect()
+    matches.into_iter().take(limit).map(|(key, _)| key).collect()
 }
 
-//fn suggest_upper_if_exists(word: &str, pairs_map: &MultiMap<String, Vec<String>>) {
-//    let word_upper = &word.to_uppercase();
-//    if pairs_map.get(word_upper).is_some() && word.chars().all(|c| c.is_lowercase()) {
-//        println!("See capitalized version: {}", word_upper);
-//    }
-//}
+fn suggest_upper_if_exists(word: &str, pairs_map: &MultiMap<String, Vec<String>>) {
+    let word_upper = &word.to_uppercase();
+    if pairs_map.get(word_upper).is_some() && word.chars().all(|c| c.is_lowercase()) {
+        println!("See capitalized version: {}", word_upper);
+    }
+}
 
 fn get_pairs_map(path: &str) -> MultiMap<String, Vec<String>> {
     let contents = fs::read_to_string(path).expect("Could not load dictionary");
