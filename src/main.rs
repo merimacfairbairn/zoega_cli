@@ -2,8 +2,8 @@ use clap::{ArgGroup, Parser};
 use multimap::MultiMap;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use std::process::exit;
 use std::fs;
+use std::process::exit;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Pair {
@@ -15,11 +15,15 @@ struct Pair {
 #[command(name = "Cleasby-Vigfusson dictionary searcher")]
 #[command(about="A CLI to search through Cleasby-Vigfusson dictionary of Old Norse Language", long_about=None)]
 #[command(author = "merimacfairbair")]
-#[command(version = "v1.1.1")]
+#[command(version = "v1.2.0")]
 #[command(group(
         ArgGroup::new("search")
         .required(true)
         .args(&["word", "pattern"])
+))]
+#[command(group(
+        ArgGroup::new("display")
+        .args(&["limit", "all"])
 ))]
 struct Cli {
     /// The input word to search for exact match
@@ -30,9 +34,13 @@ struct Cli {
     #[arg(short = 's', long, group = "search")]
     pattern: Option<String>,
 
-    /// Number of suggestions to display(default is 5)
+    /// Number of suggestions to display
     #[arg(short = 'n', long, default_value_t = 5)]
     limit: usize,
+
+    /// Display all matches ignoring the limit
+    #[arg(short, long)]
+    all: bool,
 }
 
 fn main() {
@@ -47,12 +55,18 @@ fn main() {
             definitions
                 .iter()
                 .for_each(|definition| println!("{}\n", definition));
+            suggest_upper_if_exists(&word, &pairs_map);
+            exit(1);
         }
-        suggest_upper_if_exists(word, &pairs_map);
-        exit(1);
     }
 
-    let suggestions = suggest_words(word, &pairs_map, args.pattern.as_deref(), args.limit);
+    let suggestions = suggest_words(
+        word,
+        &pairs_map,
+        args.pattern.as_deref(),
+        args.limit,
+        args.all,
+    );
 
     if suggestions.is_empty() || word.unwrap_or("---").len() <= 2 {
         println!("No matches found");
@@ -69,6 +83,7 @@ fn suggest_words(
     data: &MultiMap<String, Vec<String>>,
     pattern: Option<&str>,
     limit: usize,
+    display_all: bool,
 ) -> Vec<String> {
     let regex_pattern = match pattern {
         Some(pat) => pat.to_string(),
@@ -90,7 +105,15 @@ fn suggest_words(
         .collect();
 
     matches.sort_by_key(|&(_, extra_chars)| extra_chars);
-    matches.into_iter().take(limit).map(|(key, _)| key).collect()
+    if display_all {
+        matches.into_iter().map(|(key, _)| key).collect()
+    } else {
+        matches
+            .into_iter()
+            .take(limit)
+            .map(|(key, _)| key)
+            .collect()
+    }
 }
 
 fn suggest_upper_if_exists(word: &str, pairs_map: &MultiMap<String, Vec<String>>) {
