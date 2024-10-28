@@ -3,7 +3,7 @@
 ## Improvement ideas:
  * [x] Add suggestions when a word is not correctly typed
  * [x] Do something with the words spelled in capitals
- * [ ] Create a regex search option
+ * [x] Create a regex search option
  * [ ] Optimize if possible
 
 ---
