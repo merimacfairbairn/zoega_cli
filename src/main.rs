@@ -1,9 +1,9 @@
 use clap::Parser;
 use multimap::MultiMap;
 use regex::Regex;
-use std::{fs, process::exit};
-use std::path::Path;
 use std::io::{self, BufRead, Write};
+use std::path::Path;
+use std::{fs, process::exit};
 
 mod config;
 
