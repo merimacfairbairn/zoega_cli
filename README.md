@@ -1,7 +1,6 @@
 # CLI Old-Norse dictionary search application
 
 ## Improvement ideas:
- * [ ] Work on compatibility with windows
  * [ ] Optimize if possible
 
 ---

@@ -1,63 +1,19 @@
-use clap::{ArgGroup, Parser};
+use clap::Parser;
 use multimap::MultiMap;
 use regex::Regex;
-use serde::{Deserialize, Serialize};
 use std::{fs, process::exit};
 use std::path::Path;
 use std::io::{self, BufRead, Write};
 
-const DICTIONARY_FILE: &str = "data/dictionary.json";
-const HISTORY_FILE: &str = "data/history.txt";
+mod config;
+
+static DICTIONARY_FILE: &str = "data/dictionary.json";
+
+static HISTORY_FILE: &str = "data/history.txt";
 const HISTORY_LIMIT: usize = 70;
 
-#[derive(Serialize, Deserialize, Debug)]
-struct Pair {
-    word: String,
-    definitions: Vec<String>,
-}
-
-#[derive(Parser)]
-#[command(name = "Cleasby-Vigfusson dictionary searcher")]
-#[command(about="A CLI to search through Cleasby-Vigfusson dictionary of Old Norse Language", long_about=None)]
-#[command(author = "merimacfairbairn")]
-#[command(version = "v1.3.2")]
-#[command(group(
-        ArgGroup::new("mode")
-        .required(true)
-        .args(&["word", "search", "history", "clear_history"])
-))]
-#[command(group(
-        ArgGroup::new("display")
-        .args(&["limit", "all"])
-))]
-struct Cli {
-    /// The input word to search for exact match
-    #[arg(group = "mode")]
-    word: Option<String>,
-
-    /// Custom regex pattern for search
-    #[arg(short = 's', long, group = "mode", value_name = "PATTERN")]
-    search: Option<String>,
-
-    /// Number of suggestions to display
-    #[arg(short = 'n', long, default_value_t = 5, group = "display")]
-    limit: usize,
-
-    /// Display all matches ignoring the limit
-    #[arg(short, long, group = "display")]
-    all: bool,
-
-    /// Show search history
-    #[arg(long, group = "mode")]
-    history: bool,
-
-    /// Clear search history
-    #[arg(long, group = "mode")]
-    clear_history: bool,
-}
-
 fn main() {
-    let args = Cli::parse();
+    let args = config::Cli::parse();
 
     let word = args.word.as_deref();
     let pairs_map = get_pairs_map();
@@ -78,7 +34,7 @@ fn main() {
                 .iter()
                 .for_each(|definition| println!("{}\n", definition));
             suggest_upper_if_exists(&word, &pairs_map);
-            exit(1);
+            exit(0);
         }
     } else if let Some(pattern) = &args.search {
         add_to_history(format!("\"{pattern}\"").as_str());
@@ -100,6 +56,18 @@ fn main() {
             println!(" - {}", suggestion);
         }
     }
+}
+
+fn get_pairs_map() -> MultiMap<String, Vec<String>> {
+    let contents = fs::read_to_string(DICTIONARY_FILE).expect("Could not load dictionary");
+    let json: Vec<config::Pair> = serde_json::from_str(&contents).expect("Malformed JSON");
+
+    let mut pairs_map = MultiMap::new();
+    for pair in &json {
+        pairs_map.insert(pair.word.clone(), pair.definitions.clone());
+    }
+
+    pairs_map
 }
 
 fn suggest_words(
@@ -145,18 +113,6 @@ fn suggest_upper_if_exists(word: &str, pairs_map: &MultiMap<String, Vec<String>>
     if pairs_map.get(word_upper).is_some() && word.chars().all(|c| c.is_lowercase()) {
         println!("See capitalized version: {}", word_upper);
     }
-}
-
-fn get_pairs_map() -> MultiMap<String, Vec<String>> {
-    let contents = fs::read_to_string(DICTIONARY_FILE).expect("Could not load dictionary");
-    let json: Vec<Pair> = serde_json::from_str(&contents).expect("Malformed JSON");
-
-    let mut pairs_map = MultiMap::new();
-    for pair in &json {
-        pairs_map.insert(pair.word.clone(), pair.definitions.clone());
-    }
-
-    pairs_map
 }
 
 fn add_to_history(term: &str) {
