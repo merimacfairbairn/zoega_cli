@@ -19,8 +19,8 @@ struct Pair {
 #[derive(Parser)]
 #[command(name = "Cleasby-Vigfusson dictionary searcher")]
 #[command(about="A CLI to search through Cleasby-Vigfusson dictionary of Old Norse Language", long_about=None)]
-#[command(author = "merimacfairbair")]
-#[command(version = "v1.3.0")]
+#[command(author = "merimacfairbairn")]
+#[command(version = "v1.3.1")]
 #[command(group(
         ArgGroup::new("mode")
         .required(true)
@@ -169,6 +169,10 @@ fn add_to_history(term: &str) {
     } else {
         vec![]
     };
+
+    if history.contains(&term.to_string()) {
+        return;
+    }
 
     history.push(term.to_string());
 
