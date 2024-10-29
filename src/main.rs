@@ -20,7 +20,7 @@ struct Pair {
 #[command(name = "Cleasby-Vigfusson dictionary searcher")]
 #[command(about="A CLI to search through Cleasby-Vigfusson dictionary of Old Norse Language", long_about=None)]
 #[command(author = "merimacfairbairn")]
-#[command(version = "v1.3.1")]
+#[command(version = "v1.3.2")]
 #[command(group(
         ArgGroup::new("mode")
         .required(true)
@@ -81,7 +81,7 @@ fn main() {
             exit(1);
         }
     } else if let Some(pattern) = &args.search {
-        add_to_history(pattern);
+        add_to_history(format!("\"{pattern}\"").as_str());
     }
 
     let suggestions = suggest_words(
