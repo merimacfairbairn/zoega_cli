@@ -1,14 +1,14 @@
 use clap::{ArgGroup, Parser};
-use cleasby::*;
 use std::process::exit;
+use zoega::*;
 
 mod history;
 
 #[derive(Parser)]
-#[command(name = "Cleasby-Vigfusson dictionary searcher")]
-#[command(about="A CLI to search through Cleasby-Vigfusson dictionary of Old Norse Language", long_about=None)]
+#[command(name = "Geir Zoega dictionary searcher")]
+#[command(about="A CLI to search through Geir Zoega dictionary of Old Norse Language", long_about=None)]
 #[command(author = "merimacfairbairn")]
-#[command(version = "v1.3.3")]
+#[command(version = "v1.4.3")]
 #[command(group(
         ArgGroup::new("mode")
         .required(true)
@@ -48,7 +48,7 @@ fn main() {
     let args = Cli::parse();
 
     let word = args.word.as_deref();
-    let word_to_definitions = get_word_to_definitons_map();
+    let word_to_definitions = get_default();
 
     if args.history {
         history::display_history();
@@ -64,10 +64,7 @@ fn main() {
             println!("Definitons for: '{}':", word);
             definitions
                 .iter()
-                .for_each(|definition| println!("{}\n", definition));
-            if is_upper_in_map(&word, &word_to_definitions) {
-                println!("See the capitalized version: {}", &word.to_uppercase());
-            }
+                .for_each(|definition| println!("{}", definition));
             exit(0);
         }
     } else if let Some(pattern) = &args.search {

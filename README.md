@@ -8,4 +8,4 @@
  * [ ] Autocompletion on the fly
 
 ---
-The JSON dictionary is taken form [stscoundrel/old-norse-dictionary-py](https://github.com/stscoundrel/old-norse-dictionary-py)
+The JSON dictionary is taken form [stscoundrel/old-icelandic-dictionary-py](https://github.com/stscoundrel/old-icelandic-dictionary-py)

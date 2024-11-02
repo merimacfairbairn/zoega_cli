@@ -101,28 +101,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1462739cb27611015575c0c11df5df7601141071f07518d56fcc1be504cbec97"
 
 [[package]]
-name = "cleasby"
-version = "1.0.0"
-dependencies = [
- "multimap",
- "regex",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "cleasby_cli"
-version = "1.3.3"
-dependencies = [
- "clap",
- "cleasby",
- "multimap",
- "regex",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "colorchoice"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -347,3 +325,25 @@ name = "windows_x86_64_msvc"
 version = "0.52.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
+
+[[package]]
+name = "zoega"
+version = "1.0.0"
+dependencies = [
+ "multimap",
+ "regex",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "zoega_cli"
+version = "1.4.3"
+dependencies = [
+ "clap",
+ "multimap",
+ "regex",
+ "serde",
+ "serde_json",
+ "zoega",
+]

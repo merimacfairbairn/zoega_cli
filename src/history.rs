@@ -1,6 +1,6 @@
+use std::fs;
 use std::io::{self, BufRead, Write};
 use std::path::Path;
-use std::fs;
 
 static HISTORY_FILE: &str = "data/history.txt";
 const HISTORY_LIMIT: usize = 70;
