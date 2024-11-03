@@ -17,7 +17,8 @@ use zoega::*;
             "clear",
             "favorite",
             "unfavorite",
-            "show_favorites"
+            "show_favorites",
+            "word_of_the_day"
         ])
 ))]
 #[command(group(
@@ -60,6 +61,10 @@ struct Cli {
     /// Display favorites
     #[arg(long, group = "mode")]
     show_favorites: bool,
+
+    /// Display word of the day
+    #[arg(long, group = "mode")]
+    word_of_the_day: bool,
 }
 
 fn main() {
@@ -67,6 +72,17 @@ fn main() {
 
     let word = args.word.as_deref();
     let word_to_definitions = get_default();
+
+    if args.word_of_the_day {
+        let word_of_the_day = random::get_word_of_the_day(&word_to_definitions);
+        if let Some(definitions) = word_to_definitions.get(&word_of_the_day) {
+            println!("Word of the day is: {}", word_of_the_day);
+            for definition in definitions {
+                println!("{}", definition);
+            }
+        }
+        exit(0);
+    }
 
     if let Some(word) = args.favorite {
         favorites::add(&word);
