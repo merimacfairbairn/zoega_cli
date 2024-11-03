@@ -2,7 +2,7 @@
 
 ## Improvement ideas:
  * [x] Add option to save favourites
- * [ ] Add 'Word of the Day' feature
+ * [x] Add 'Word of the Day' feature
  * [ ] Random word feature
  * [ ] Fuzzy search
  * [ ] Autocompletion on the fly
