@@ -4,7 +4,7 @@
  * [x] Add option to save favourites
  * [x] Add 'Word of the Day' feature
  * [x] Random word feature
- * [ ] Fuzzy search
+ * [x] Fuzzy search
  * [ ] Autocompletion on the fly
 
 ---

@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use clap::{ArgGroup, Parser};
+use std::collections::HashMap;
 use std::process::exit;
 use zoega::*;
 
@@ -7,7 +7,7 @@ use zoega::*;
 #[command(name = "Geir Zoega dictionary searcher")]
 #[command(about="A CLI to search through Geir Zoega dictionary of Old Norse Language", long_about=None)]
 #[command(author = "merimacfairbairn")]
-#[command(version = "v1.6.3")]
+#[command(version = "v1.7.0")]
 #[command(group(
         ArgGroup::new("mode")
         .required(true)
@@ -27,6 +27,10 @@ use zoega::*;
         ArgGroup::new("display")
         .args(&["limit", "all"])
 ))]
+#[command(group(
+        ArgGroup::new("search_type")
+        .args(&["search", "fuzzy"])
+))]
 struct Cli {
     /// The input word to search for exact match
     #[arg(group = "mode")]
@@ -37,7 +41,13 @@ struct Cli {
     search: Option<String>,
 
     /// Number of suggestions to display
-    #[arg(short = 'n', long, default_value_t = 5, group = "display")]
+    #[arg(
+        short = 'n',
+        long,
+        default_value_t = 5,
+        group = "display",
+        value_name = "NUM"
+    )]
     limit: usize,
 
     /// Display all matches ignoring the limit
@@ -71,6 +81,20 @@ struct Cli {
     /// Display a random word
     #[arg(long, short, group = "mode")]
     random: bool,
+
+    /// Enable fuzzy search
+    #[arg(long, short, group = "search_type")]
+    fuzzy: bool,
+
+    /// Change fuzzy search level
+    #[arg(
+        long,
+        short = 'l',
+        default_value_t = 2,
+        value_name = "NUM",
+        requires("fuzzy")
+    )]
+    fuzzy_level: usize,
 }
 
 fn main() {
@@ -82,7 +106,7 @@ fn main() {
     if args.random {
         match random::get_random_word(&word_to_definitions) {
             Some(word) => print_definitions(&word, &word_to_definitions),
-            None => println!("No words found in dictionary")
+            None => println!("No words found in dictionary"),
         }
         exit(0);
     }
@@ -96,11 +120,9 @@ fn main() {
     if let Some(word) = args.favorite {
         favorites::add(&word);
         exit(0);
-
     } else if let Some(word) = args.unfavorite {
         favorites::remove(&word);
         exit(0);
-
     } else if args.show_favorites {
         let favorites = favorites::get();
         if favorites.is_empty() {
@@ -123,24 +145,28 @@ fn main() {
 
     if let Some(word) = word {
         history::add(word);
-        if let Some(definitions) = word_to_definitions.get(word) {
-            println!("Definitons for: '{}':", word);
-            definitions
-                .iter()
-                .for_each(|definition| println!("{}", definition));
-            exit(0);
-        }
+        print_definitions(&word, &word_to_definitions);
     } else if let Some(pattern) = &args.search {
         history::add(format!("\"{pattern}\"").as_str());
     }
 
-    let suggestions = suggest_words(
-        word,
-        &word_to_definitions,
-        args.search.as_deref(),
-        args.limit,
-        args.all,
-    );
+    let suggestions = if args.fuzzy {
+        fuzzy_search(
+            word,
+            word_to_definitions,
+            args.fuzzy_level,
+            args.limit,
+            args.all,
+        )
+    } else {
+        suggest_words(
+            word,
+            &word_to_definitions,
+            args.search.as_deref(),
+            args.limit,
+            args.all,
+        )
+    };
 
     if suggestions.is_empty() || word.unwrap_or("---").len() <= 2 {
         println!("No matches found");
@@ -155,8 +181,11 @@ fn main() {
 fn print_definitions(word: &str, data: &HashMap<String, Vec<String>>) {
     if let Some(definitions) = data.get(word) {
         println!("Definitions for {}:", word);
-        for definition in definitions {
-            println!(" - {}", definition);
-        }
+        definitions
+            .iter()
+            .for_each(|definition| println!("{}", definition));
+        exit(0);
     }
+
+    println!("No definitions found for '{}'", word);
 }
