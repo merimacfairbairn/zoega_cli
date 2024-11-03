@@ -3,7 +3,7 @@
 ## Improvement ideas:
  * [x] Add option to save favourites
  * [x] Add 'Word of the Day' feature
- * [ ] Random word feature
+ * [x] Random word feature
  * [ ] Fuzzy search
  * [ ] Autocompletion on the fly
 

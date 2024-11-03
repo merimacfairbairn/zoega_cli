@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use clap::{ArgGroup, Parser};
 use std::process::exit;
 use zoega::*;
@@ -6,7 +7,7 @@ use zoega::*;
 #[command(name = "Geir Zoega dictionary searcher")]
 #[command(about="A CLI to search through Geir Zoega dictionary of Old Norse Language", long_about=None)]
 #[command(author = "merimacfairbairn")]
-#[command(version = "v1.4.3")]
+#[command(version = "v1.6.3")]
 #[command(group(
         ArgGroup::new("mode")
         .required(true)
@@ -18,7 +19,8 @@ use zoega::*;
             "favorite",
             "unfavorite",
             "show_favorites",
-            "word_of_the_day"
+            "word_of_the_day",
+            "random",
         ])
 ))]
 #[command(group(
@@ -65,6 +67,10 @@ struct Cli {
     /// Display word of the day
     #[arg(long, group = "mode")]
     word_of_the_day: bool,
+
+    /// Display a random word
+    #[arg(long, short, group = "mode")]
+    random: bool,
 }
 
 fn main() {
@@ -73,23 +79,28 @@ fn main() {
     let word = args.word.as_deref();
     let word_to_definitions = get_default();
 
+    if args.random {
+        match random::get_random_word(&word_to_definitions) {
+            Some(word) => print_definitions(&word, &word_to_definitions),
+            None => println!("No words found in dictionary")
+        }
+        exit(0);
+    }
+
     if args.word_of_the_day {
         let word_of_the_day = random::get_word_of_the_day(&word_to_definitions);
-        if let Some(definitions) = word_to_definitions.get(&word_of_the_day) {
-            println!("Word of the day is: {}", word_of_the_day);
-            for definition in definitions {
-                println!("{}", definition);
-            }
-        }
+        print_definitions(&word_of_the_day, &word_to_definitions);
         exit(0);
     }
 
     if let Some(word) = args.favorite {
         favorites::add(&word);
         exit(0);
+
     } else if let Some(word) = args.unfavorite {
         favorites::remove(&word);
         exit(0);
+
     } else if args.show_favorites {
         let favorites = favorites::get();
         if favorites.is_empty() {
@@ -137,6 +148,15 @@ fn main() {
         println!("Did you mean one of these?");
         for suggestion in suggestions {
             println!(" - {}", suggestion);
+        }
+    }
+}
+
+fn print_definitions(word: &str, data: &HashMap<String, Vec<String>>) {
+    if let Some(definitions) = data.get(word) {
+        println!("Definitions for {}:", word);
+        for definition in definitions {
+            println!(" - {}", definition);
         }
     }
 }
