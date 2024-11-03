@@ -2,8 +2,6 @@ use clap::{ArgGroup, Parser};
 use std::process::exit;
 use zoega::*;
 
-mod history;
-
 #[derive(Parser)]
 #[command(name = "Geir Zoega dictionary searcher")]
 #[command(about="A CLI to search through Geir Zoega dictionary of Old Norse Language", long_about=None)]
@@ -12,7 +10,15 @@ mod history;
 #[command(group(
         ArgGroup::new("mode")
         .required(true)
-        .args(&["word", "search", "history", "clear_history"])
+        .args(&[
+            "word",
+            "search",
+            "history",
+            "clear",
+            "favorite",
+            "unfavorite",
+            "show_favorites"
+        ])
 ))]
 #[command(group(
         ArgGroup::new("display")
@@ -41,7 +47,19 @@ struct Cli {
 
     /// Clear search history
     #[arg(long, group = "mode")]
-    clear_history: bool,
+    clear: bool,
+
+    /// Add a word to favorites
+    #[arg(long, group = "mode", value_name = "WORD")]
+    favorite: Option<String>,
+
+    /// Remove a word from favorites
+    #[arg(long, group = "mode", value_name = "WORD")]
+    unfavorite: Option<String>,
+
+    /// Display favorites
+    #[arg(long, group = "mode")]
+    show_favorites: bool,
 }
 
 fn main() {
@@ -50,16 +68,34 @@ fn main() {
     let word = args.word.as_deref();
     let word_to_definitions = get_default();
 
-    if args.history {
-        history::display_history();
+    if let Some(word) = args.favorite {
+        favorites::add(&word);
         exit(0);
-    } else if args.clear_history {
-        history::clear_history();
+    } else if let Some(word) = args.unfavorite {
+        favorites::remove(&word);
+        exit(0);
+    } else if args.show_favorites {
+        let favorites = favorites::get();
+        if favorites.is_empty() {
+            println!("No favorites yet");
+            exit(0);
+        }
+        for word in favorites {
+            println!(" - {}", word);
+        }
+        exit(0);
+    }
+
+    if args.history {
+        history::display();
+        exit(0);
+    } else if args.clear {
+        history::clear();
         exit(0);
     }
 
     if let Some(word) = word {
-        history::add_to_history(word);
+        history::add(word);
         if let Some(definitions) = word_to_definitions.get(word) {
             println!("Definitons for: '{}':", word);
             definitions
@@ -68,7 +104,7 @@ fn main() {
             exit(0);
         }
     } else if let Some(pattern) = &args.search {
-        history::add_to_history(format!("\"{pattern}\"").as_str());
+        history::add(format!("\"{pattern}\"").as_str());
     }
 
     let suggestions = suggest_words(

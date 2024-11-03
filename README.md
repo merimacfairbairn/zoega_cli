@@ -1,10 +1,10 @@
 # CLI Old-Norse dictionary search application
 
 ## Improvement ideas:
+ * [x] Add option to save favourites
  * [ ] Add 'Word of the Day' feature
- * [ ] Add option to save favourites
- * [ ] Fuzzy search
  * [ ] Random word feature
+ * [ ] Fuzzy search
  * [ ] Autocompletion on the fly
 
 ---
