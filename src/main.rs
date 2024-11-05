@@ -192,7 +192,7 @@ fn main() {
 
             match random::get_random_word(&word_to_definitions) {
                 Some(word) => print_definitions(&word, &word_to_definitions),
-                None => println!("No words found in dictionary"),
+                None => panic!("No words found in dictionary"),
             }
         }
     }
