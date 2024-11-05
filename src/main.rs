@@ -112,10 +112,11 @@ struct RandArgs {
 
 fn main() {
     let args = Cli::parse();
+    let word_to_definitions = get_default();
+
     match &args.command {
         Commands::Word(word_args) => {
             let word = word_args.word.as_deref();
-            let word_to_definitions = get_default();
 
             if let Some(word) = word {
                 history::add(word);
@@ -142,9 +143,7 @@ fn main() {
                 )
             };
 
-            if suggestions.is_empty() || word.unwrap_or("---").len() <= 2 {
-                println!("No matches found");
-            } else {
+            if !suggestions.is_empty() && word.unwrap().len() > 2 {
                 println!("Did you mean one of these?");
                 for suggestion in suggestions {
                     println!(" - {}", suggestion);
@@ -182,8 +181,6 @@ fn main() {
         }
 
         Commands::Rand(args) => {
-            let word_to_definitions = get_default();
-
             if args.word_of_the_day {
                 let word_of_the_day = random::get_word_of_the_day(&word_to_definitions);
                 print_definitions(&word_of_the_day, &word_to_definitions);
