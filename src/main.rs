@@ -144,15 +144,14 @@ fn main() {
                 )
             };
 
-            if suggestions.is_empty() || word.unwrap_or("---").len() < 2 {
-                println!("Did you mean one of these?");
-                for suggestion in suggestions {
-                    println!(" - {}", suggestion);
-                }
+            if suggestions.is_empty() || word.unwrap_or("---").len() <= 2 {
                 exit(0);
             }
 
-            println!("No suggestions found");
+            println!("Did you mean one of these?");
+            for suggestion in suggestions {
+                println!(" - {}", suggestion);
+            }
         }
 
         Commands::Hist(hist_args) => {
