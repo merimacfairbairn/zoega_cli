@@ -65,6 +65,7 @@ struct WordArgs {
         requires("fuzzy")
     )]
     fuzzy_level: usize,
+    // TODO: make it require fuzzy
 
     /// Number of suggestions to display
     #[arg(
@@ -143,12 +144,15 @@ fn main() {
                 )
             };
 
-            if !suggestions.is_empty() && word.unwrap().len() > 2 {
+            if suggestions.is_empty() || word.unwrap_or("---").len() < 2 {
                 println!("Did you mean one of these?");
                 for suggestion in suggestions {
                     println!(" - {}", suggestion);
                 }
+                exit(0);
             }
+
+            println!("No suggestions found");
         }
 
         Commands::Hist(hist_args) => {
