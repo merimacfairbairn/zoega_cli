@@ -62,10 +62,10 @@ struct WordArgs {
         short = 'l',
         default_value_t = 2,
         value_name = "NUM",
-        requires("fuzzy")
+        requires("fuzzy"),
+        conflicts_with("search")
     )]
     fuzzy_level: usize,
-    // TODO: make it require fuzzy
 
     /// Number of suggestions to display
     #[arg(
