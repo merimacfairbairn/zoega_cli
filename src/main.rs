@@ -1,7 +1,7 @@
 use clap::{ArgGroup, Args, Parser, Subcommand};
 use std::collections::HashMap;
 use std::process::exit;
-use zoega::*;
+use zoega::{self, favorites, history, random};
 
 #[derive(Parser)]
 #[command(name = "Geir Zoega dictionary searcher")]
@@ -113,7 +113,7 @@ struct RandArgs {
 
 fn main() {
     let args = Cli::parse();
-    let word_to_definitions = get_default();
+    let word_to_definitions = zoega::get_default();
 
     match &args.command {
         Commands::Word(word_args) => {
@@ -127,7 +127,7 @@ fn main() {
             }
 
             let suggestions = if !word_args.fuzzy {
-                suggest_words(
+                zoega::suggest_words(
                     word,
                     &word_to_definitions,
                     word_args.search.as_deref(),
@@ -135,7 +135,7 @@ fn main() {
                     word_args.all,
                 )
             } else {
-                fuzzy_suggest(
+                zoega::fuzzy_suggest(
                     word,
                     word_to_definitions,
                     word_args.fuzzy_level,
