@@ -165,7 +165,7 @@ fn main() {
 
         Commands::Fav(fav_args) => {
             if let Some(word) = &fav_args.add {
-                favorites::add(&word);
+                favorites::add(&word, &word_to_definitions);
                 exit(0);
             } else if let Some(word) = &fav_args.remove {
                 favorites::remove(&word);
