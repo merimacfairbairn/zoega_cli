@@ -19,10 +19,10 @@ enum Commands {
     /// Search words
     Word(WordArgs),
 
-    /// Manage history
+    /// Show or clear history
     Hist(HistArgs),
 
-    /// Manage favorites
+    /// Show or manage favorites
     Fav(FavArgs),
 
     /// Random word definitions
