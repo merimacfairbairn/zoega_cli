@@ -10,7 +10,7 @@ pub fn add(term: &str) {
         let file = fs::File::open(HISTORY_FILE).expect("Failed to open history file");
         io::BufReader::new(file)
             .lines()
-            .filter_map(Result::ok)
+            .map_while(Result::ok)
             .collect::<Vec<String>>()
     } else {
         fs::create_dir_all("data").expect("Failed to create 'data' directory");

@@ -3,8 +3,6 @@ name = "zoega_cli"
 version = "1.7.1"
 edition = "2021"
 
-[workspace]
-
 [dependencies]
 zoega = { path = "lib" }
 clap = { version = "4.5.20", features = ["derive"] }

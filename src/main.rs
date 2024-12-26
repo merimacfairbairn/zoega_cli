@@ -121,7 +121,7 @@ fn main() {
 
             if let Some(word) = word {
                 history::add(word);
-                print_definitions(&word, &word_to_definitions);
+                print_definitions(word, &word_to_definitions);
             } else if let Some(pattern) = &word_args.search {
                 history::add(format!("\"{pattern}\"").as_str());
             }
@@ -165,10 +165,10 @@ fn main() {
 
         Commands::Fav(fav_args) => {
             if let Some(word) = &fav_args.add {
-                favorites::add(&word, &word_to_definitions);
+                favorites::add(word, &word_to_definitions);
                 exit(0);
             } else if let Some(word) = &fav_args.remove {
-                favorites::remove(&word);
+                favorites::remove(word);
                 exit(0);
             }
 

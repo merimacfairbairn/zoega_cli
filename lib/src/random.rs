@@ -30,7 +30,7 @@ fn calculate_new_word_of_the_day(data: &HashMap<String, Vec<String>>, today: &st
     writeln!(file, "{}", today).expect("Failed to write date");
     writeln!(file, "{}", word_of_the_day).expect("Failed to write word");
 
-    return word_of_the_day.to_string();
+    word_of_the_day.to_string()
 }
 
 pub fn get_random_word(data: &HashMap<String, Vec<String>>) -> Option<String> {

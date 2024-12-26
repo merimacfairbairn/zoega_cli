@@ -1,6 +1,5 @@
 use regex::{self, Regex};
 use serde::{Deserialize, Serialize};
-use serde_json;
 use std::collections::HashMap;
 use strsim::levenshtein;
 
@@ -29,7 +28,7 @@ fn get_word_to_definitons_map(default: bool) -> HashMap<String, Vec<String>> {
         include_str!("../data/markup.json")
     };
 
-    let json: Vec<Pair> = serde_json::from_str(&contents).expect("Malformed JSON");
+    let json: Vec<Pair> = serde_json::from_str(contents).expect("Malformed JSON");
 
     let mut word_to_definitions = HashMap::new();
     for pair in json {
@@ -88,7 +87,7 @@ pub fn fuzzy_suggest(
     let word = word.expect("Word must be provided if the pattern is not specified");
     let mut matches: Vec<(String, usize)> = data
         .keys()
-        .map(|key| (key.clone(), levenshtein(&word, key)))
+        .map(|key| (key.clone(), levenshtein(word, key)))
         .filter(|&(_, dist)| dist <= fuzzy_level)
         .collect();
 

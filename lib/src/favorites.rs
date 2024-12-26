@@ -39,7 +39,7 @@ pub fn get() -> Vec<String> {
         let file = fs::File::open(FAVORITES_FILE).expect("Failed to open favorites file");
         BufReader::new(file)
             .lines()
-            .filter_map(Result::ok)
+            .map_while(Result::ok)
             .collect::<Vec<String>>()
     } else {
         fs::create_dir_all("data").expect("Failed to create 'data' directory");
