@@ -137,7 +137,7 @@ fn main() {
             } else {
                 zoega::fuzzy_suggest(
                     word,
-                    word_to_definitions,
+                    &word_to_definitions,
                     word_args.fuzzy_level,
                     word_args.limit,
                     word_args.all,

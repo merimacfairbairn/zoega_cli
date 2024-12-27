@@ -79,7 +79,7 @@ pub fn suggest_words(
 
 pub fn fuzzy_suggest(
     word: Option<&str>,
-    data: HashMap<String, Vec<String>>,
+    data: &HashMap<String, Vec<String>>,
     fuzzy_level: usize,
     limit: usize,
     display_all: bool,
