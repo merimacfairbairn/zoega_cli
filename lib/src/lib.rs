@@ -43,6 +43,7 @@ pub fn suggest_words(
     data: &HashMap<String, Vec<String>>,
     pattern: Option<&str>,
     limit: usize,
+    offset: usize,
     display_all: bool,
 ) -> Vec<String> {
     let regex_pattern = match pattern {
@@ -72,6 +73,7 @@ pub fn suggest_words(
 
     matches
         .into_iter()
+        .skip(offset)
         .take(limit)
         .map(|(key, _)| key)
         .collect()
@@ -82,6 +84,7 @@ pub fn fuzzy_suggest(
     data: &HashMap<String, Vec<String>>,
     fuzzy_level: usize,
     limit: usize,
+    offset: usize,
     display_all: bool,
 ) -> Vec<String> {
     let word = word.expect("Word must be provided if the pattern is not specified");
@@ -101,6 +104,7 @@ pub fn fuzzy_suggest(
 
     matches
         .into_iter()
+        .skip(offset)
         .take(limit)
         .map(|(key, _)| key)
         .collect()

@@ -131,6 +131,7 @@ fn main() {
                     word,
                     &word_to_definitions,
                     word_args.search.as_deref(),
+                    0,
                     word_args.limit,
                     word_args.all,
                 )
@@ -139,6 +140,7 @@ fn main() {
                     word,
                     &word_to_definitions,
                     word_args.fuzzy_level,
+                    0,
                     word_args.limit,
                     word_args.all,
                 )
